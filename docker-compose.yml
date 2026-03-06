@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: perf-pressure-traverse:latest
+    container_name: perf-pressure-traverse-app
+    volumes:
+      - .:/app
+      - ./data:/data
+    working_dir: /app
+    command: tail -f /dev/null
+    
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: perf-pressure-traverse:latest
+    container_name: perf-pressure-traverse-tests
+    volumes:
+      - .:/app
+      - ./tests:/tests
+    working_dir: /app
+    command: pytest tests/ -v --cov=perf_pressure_traverse --cov-report=term-missing
+    
+  docs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: perf-pressure-traverse:latest
+    container_name: perf-pressure-traverse-docs
+    volumes:
+      - .:/app
+      - ./docs:/docs
+      - ./build:/build
+    working_dir: /docs
+    command: make html
+    
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: perf-pressure-traverse:latest
+    container_name: perf-pressure-traverse-lint
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: |
+      flake8 perf_pressure_traverse/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+      black --check perf_pressure_traverse/ tests/
+      pylint perf_pressure_traverse/ --exit-zero
