@@ -164,4 +164,4 @@ class TestPVTPropertiesWithFluid:
         )
         
         # Oil should have lower formation volume factor
-        assert pvt.formation_volume_factor > 1.0 but < 1.5
+        assert pvt.formation_volume_factor > 1.0 and pvt.formation_volume_factor < 1.5
