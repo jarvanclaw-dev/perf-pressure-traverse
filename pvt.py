@@ -1,1 +1,0 @@
-pvt_properties.py
