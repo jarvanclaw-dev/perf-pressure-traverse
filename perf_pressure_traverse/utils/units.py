@@ -10,13 +10,50 @@ import math
 FT_TO_M = 0.3048  # 1 foot = 0.3048 meters
 PSI_TO_PA = 6894.75729  # 1 psi = 6894.75729 pascals
 RANKINE_TO_KELVIN = 5.0 / 9.0  # 1 Rankine = 0.555555... K
-RANKINE_TO_CELSIUS = 459.67  # Freezing point of water in Rankine (0°C = 491.67°R)
+RANKINE_TO_CELSIUS = 491.67  # Freezing point of water in Rankine (0°C = 491.67°R)
 KELVIN_TO_RANKINE = RANKINE_TO_KELVIN  # Direct inverse
 
 
 class UnitConversionError(ValueError):
     """Raised when converting between incompatible units."""
     pass
+
+
+def validate_unit_pair(
+    unit1: str,
+    unit2: str,
+    allowed_pairs: list[tuple[str, str]]
+) -> None:
+    """
+    Validate that two units can be converted between each other.
+    
+    Parameters
+    ----------
+    unit1 : str
+        First unit label.
+    unit2 : str
+        Second unit label.
+    allowed_pairs : list of tuples
+        List of valid pairs (unit1, unit2) that allow conversion.
+        Each unit in a pair can convert to both directions.
+    
+    Raises
+    ------
+    UnitConversionError
+        If the units are not compatible.
+    
+    Examples
+    --------
+    >>> validate_unit_pair('ft', 'm', [('ft', 'm')])
+    # No error
+    
+    >>> validate_unit_pair('ft', 'psi', [('ft', 'm')])
+    UnitConversionError: Incompatible units: ft and psi cannot be converted
+    """
+    if (unit1, unit2) not in allowed_pairs and (unit2, unit1) not in allowed_pairs:
+        raise UnitConversionError(
+            f"Incompatible units: {unit1} and {unit2} cannot be converted"
+        )
 
 
 def ft_to_m(feet: float) -> float:
@@ -235,149 +272,235 @@ def kelvin_to_rankine(kelvin: float) -> float:
     return kelvin * (9.0 / 5.0)
 
 
-def validate_unit_pair(
-    unit1: str,
-    unit2: str,
-    allowed_pairs: list[tuple[str, str]]
-) -> None:
+def fahrenheit_to_celsius(fahrenheit: float) -> float:
     """
-    Validate that two units can be converted between each other.
+    Convert temperature from API units (°F) to API units (°C).
+    
+    The formula is: °C = (°F - 32) * 5/9
     
     Parameters
     ----------
-    unit1 : str
-        First unit label.
-    unit2 : str
-        Second unit label.
-    allowed_pairs : list of tuples
-        List of valid pairs (unit1, unit2) that allow conversion.
-        Each unit in a pair can convert to both directions.
+    fahrenheit : float
+        Temperature in degrees Fahrenheit.
     
-    Raises
-    ------
-    UnitConversionError
-        If the units are not compatible.
+    Returns
+    -------
+    float
+        Temperature in degrees Celsius.
     
     Examples
     --------
-    >>> validate_unit_pair('ft', 'm', [('ft', 'm')])
-    # No error
-    
-    >>> validate_unit_pair('ft', 'psi', [('ft', 'm')])
-    UnitConversionError: Incompatible units: ft and psi cannot be converted
+    >>> round(fahrenheit_to_celsius(32.0), 2)
+    0.0
+    >>> round(fahrenheit_to_celsius(212.0), 2)
+    100.0
     """
-    if (unit1, unit2) not in allowed_pairs and (unit2, unit1) not in allowed_pairs:
-        raise UnitConversionError(
-            f"Incompatible units: {unit1} and {unit2} cannot be converted"
-        )
+    if fahrenheit < -459.67:
+        raise ValueError("Temperature cannot be below absolute zero (-459.67°F)")
+    return (fahrenheit - 32.0) * (5.0 / 9.0)
 
 
-# Conversion shortcuts
+def celsius_to_fahrenheit(celsius: float) -> float:
+    """
+    Convert temperature from API units (°C) to API units (°F).
+    
+    The formula is: °F = (°C * 9/5) + 32
+    
+    Parameters
+    ----------
+    celsius : float
+        Temperature in degrees Celsius.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Fahrenheit.
+    
+    Examples
+    --------
+    >>> round(celsius_to_fahrenheit(0.0), 2)
+    32.0
+    >>> round(celsius_to_fahrenheit(100.0), 2)
+    212.0
+    """
+    if celsius < -273.15:
+        raise ValueError("Temperature cannot be below absolute zero (-273.15°C)")
+    return (celsius * 9.0 / 5.0) + 32.0
+
+
+def celsius_to_kelvin(celsius: float) -> float:
+    """
+    Convert temperature from API units (°C) to SI units (K).
+    
+    The formula is: K = °C + 273.15
+    
+    Parameters
+    ----------
+    celsius : float
+        Temperature in degrees Celsius.
+    
+    Returns
+    -------
+    float
+        Temperature in kelvin.
+    
+    Examples
+    --------
+    >>> celsius_to_kelvin(0.0)
+    273.15
+    >>> celsius_to_kelvin(100.0)
+    373.15
+    """
+    if celsius < -273.15:
+        raise ValueError("Temperature cannot be below absolute zero (-273.15°C)")
+    return celsius + 273.15
+
+
+def kelvin_to_celsius(kelvin: float) -> float:
+    """
+    Convert temperature from SI units (K) to API units (°C).
+    
+    The formula is: °C = K - 273.15
+    
+    Parameters
+    ----------
+    kelvin : float
+        Temperature in kelvin.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Celsius.
+    
+    Examples
+    --------
+    >>> round(kelvin_to_celsius(273.15), 2)
+    0.0
+    >>> round(kelvin_to_celsius(373.15), 2)
+    100.0
+    """
+    if kelvin < 0:
+        raise ValueError("Temperature cannot be below absolute zero (0 K)")
+    return kelvin - 273.15
+
+
+def fahrenheit_to_rankine(fahrenheit: float) -> float:
+    """
+    Convert temperature from API units (°F) to API absolute units (°R).
+    
+    The formula is: °R = °F + 459.67
+    
+    Parameters
+    ----------
+    fahrenheit : float
+        Temperature in degrees Fahrenheit.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Rankine.
+    
+    Examples
+    --------
+    >>> round(fahrenheit_to_rankine(32.0), 2)
+    491.67
+    >>> round(fahrenheit_to_rankine(212.0), 2)
+    671.67
+    """
+    if fahrenheit < -459.67:
+        raise ValueError("Temperature cannot be below absolute zero (-459.67°F)")
+    return fahrenheit + RANKINE_TO_CELSIUS
+
+
+def rankine_to_fahrenheit(rankine: float) -> float:
+    """
+    Convert temperature from API absolute units (°R) to API units (°F).
+    
+    The formula is: °F = °R - 459.67
+    
+    Parameters
+    ----------
+    rankine : float
+        Temperature in degrees Rankine.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Fahrenheit.
+    
+    Examples
+    --------
+    >>> round(rankine_to_fahrenheit(491.67), 2)
+    32.0
+    >>> round(rankine_to_fahrenheit(671.67), 2)
+    212.0
+    """
+    if rankine < 0:
+        raise ValueError("Temperature cannot be below absolute zero (0°R)")
+    return rankine - RANKINE_TO_CELSIUS
+
+
+def celsius_to_rankine(celsius: float) -> float:
+    """
+    Convert temperature from API units (°C) to API absolute units (°R).
+    
+    The formula is: °R = (°C + 273.15) * 9/5
+    
+    Parameters
+    ----------
+    celsius : float
+        Temperature in degrees Celsius.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Rankine.
+    
+    Examples
+    --------
+    >>> round(celsius_to_rankine(0.0), 2)
+    491.67
+    >>> round(celsius_to_rankine(100.0), 2)
+    671.67
+    """
+    if celsius < -273.15:
+        raise ValueError("Temperature cannot be below absolute zero (-273.15°C)")
+    return (celsius + 273.15) * (9.0 / 5.0)
+
+
+def rankine_to_celsius(rankine: float) -> float:
+    """
+    Convert temperature from API absolute units (°R) to API units (°C).
+    
+    The formula is: °C = (°R - 491.67) * 5/9
+    
+    Parameters
+    ----------
+    rankine : float
+        Temperature in degrees Rankine.
+    
+    Returns
+    -------
+    float
+        Temperature in degrees Celsius.
+    
+    Examples
+    --------
+    >>> round(rankine_to_celsius(491.67), 2)
+    0.0
+    >>> round(rankine_to_celsius(671.67), 2)
+    100.0
+    """
+    if rankine < 0:
+        raise ValueError("Temperature cannot be below absolute zero (0°R)")
+    return (rankine - RANKINE_TO_CELSIUS) * (5.0 / 9.0)
+
+
 def convert_length(value: float, from_unit: str, to_unit: str) -> float:
     """
-    Convert length between API and SI units.
+    Convert a quantity between length units.
     
-    Supported units: 'ft' (feet), 'm' (meters)
-    
-    Parameters
-    ----------
-    value : float
-        Value to convert.
-    from_unit : str
-        Source unit label ('ft' or 'm').
-    to_unit : str
-        Target unit label ('ft' or 'm').
-    
-    Returns
-    -------
-    float
-        Converted value.
-    
-    Raises
-    ------
-    UnitConversionError
-        If units are incompatible.
-    ValueError
-        If units are not recognized.
-    """
-    units = ['ft', 'm']
-    
-    if from_unit not in units:
-        raise ValueError(f"Unknown length unit: {from_unit}")
-    if to_unit not in units:
-        raise ValueError(f"Unknown length unit: {to_unit}")
-    if from_unit == to_unit:
-        return value
-    
-    validate_unit_pair(from_unit, to_unit, [('ft', 'm')])
-    
-    if from_unit == 'ft':
-        return ft_to_m(value)
-    else:
-        return m_to_ft(value)
-
-
-def convert_pressure(value: float, from_unit: str, to_unit: str) -> float:
-    """
-    Convert pressure between API and SI units.
-    
-    Supported units: 'psi', 'Pa', 'Pascal'
-    
-    Parameters
-    ----------
-    value : float
-        Value to convert.
-    from_unit : str
-        Source unit label ('psi', 'Pa', 'Pascal').
-    to_unit : str
-        Target unit label ('psi', 'Pa', 'Pascal').
-    
-    Returns
-    -------
-    float
-        Converted value.
-    
-    Raises
-    ------
-    UnitConversionError
-        If units are incompatible.
-    ValueError
-        If units are not recognized.
-    """
-    # Alias Pa to Pascal for easier use
-    from_unit = from_unit.lower()
-    to_unit = to_unit.lower()
-    
-    # Normalize Pa to Pascal
-    if from_unit == 'pa':
-        from_unit = 'pascal'
-    if to_unit == 'pa':
-        to_unit = 'pascal'
-    
-    units = ['psi', 'pascal']
-    
-    if from_unit not in units:
-        raise ValueError(f"Unknown pressure unit: {from_unit}")
-    if to_unit not in units:
-        raise ValueError(f"Unknown pressure unit: {to_unit}")
-    if from_unit == to_unit:
-        return value
-    
-    validate_unit_pair(from_unit, to_unit, [('psi', 'pascal')])
-    
-    if from_unit == 'psi':
-        return psi_to_pa(value)
-    else:
-        return pa_to_psi(value)
-
-
-def convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
-    """
-    Convert temperature between API relative units (°F), SI relative units (°C),
-    and absolute units (K, °R).
-    
-    Supported relative units: '°F', 'F', 'fahrenheit', 'celsius', 'C', '°C'
-    Supported absolute units: 'K', 'kelvin', 'rankine', '°R', 'R', 'RANKINE'
+    Supported units: 'ft', 'm', 'meter', 'meters', 'feet', 'foot'.
     
     Parameters
     ----------
@@ -395,108 +518,175 @@ def convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
     
     Raises
     ------
+    ValueError
+        If unit is not recognized.
     UnitConversionError
         If units are incompatible.
-    ValueError
-        If units are not recognized.
     """
-    # Normalize relative units
-    from_unit_lower = from_unit.lower()
-    to_unit_lower = to_unit.lower()
+    # Normalize unit labels
+    from_unit_clean = from_unit.lower().strip()
+    to_unit_clean = to_unit.lower().strip()
     
-    # Handle °F variations
-    if from_unit_lower in ['f', 'fahrenheit']:
-        from_unit = '°F'
-    elif from_unit_lower in ['c', 'celsius', '°c']:
-        from_unit = '°C'
-    # Handle absolute units
-    elif from_unit_lower in ['k', 'kelvin']:
-        from_unit = 'K'
-    elif from_unit_lower in ['r', 'rankine', '°r']:
-        from_unit = '°R'
+    # Convert to 'ft' and 'm' internally
+    if from_unit_clean in ('ft', 'foot', 'feet'):
+        if value < 0:
+            raise ValueError("Length cannot be negative")
+        value_ft = value
+    elif from_unit_clean in ('m', 'meter', 'meters'):
+        if value < 0:
+            raise ValueError("Length cannot be negative")
+        value_ft = m_to_ft(value)
+    else:
+        raise ValueError(f"Unknown length unit: {from_unit}")
+    
+    result_ft = 0.0
+    if to_unit_clean in ('ft', 'foot', 'feet'):
+        result_ft = value_ft
+    elif to_unit_clean in ('m', 'meter', 'meters'):
+        result_ft = ft_to_m(value_ft)
+    else:
+        raise ValueError(f"Unknown length unit: {to_unit}")
+    
+    return result_ft
+
+
+def convert_pressure(value: float, from_unit: str, to_unit: str) -> float:
+    """
+    Convert a quantity between pressure units.
+    
+    Supported units: 'psi', 'Pa', 'Pascal', 'pascal', 'psia', 'psig'.
+    
+    Parameters
+    ----------
+    value : float
+        Value to convert.
+    from_unit : str
+        Source unit label.
+    to_unit : str
+        Target unit label.
+    
+    Returns
+    -------
+    float
+        Converted value.
+    
+    Raises
+    ------
+    ValueError
+        If unit is not recognized.
+    UnitConversionError
+        If units are incompatible.
+    """
+    # Normalize unit labels
+    from_unit_clean = from_unit.lower().strip()
+    to_unit_clean = to_unit.lower().strip()
+    
+    # Convert to 'psi' and 'Pa' internally
+    if from_unit_clean in ('psi', 'psia', 'psig'):
+        if value < 0:
+            raise ValueError("Pressure cannot be negative")
+        value_psi = value
+    elif from_unit_clean in ('pa', 'pascal'):
+        if value < 0:
+            raise ValueError("Pressure cannot be negative")
+        value_psi = pa_to_psi(value)
+    else:
+        raise ValueError(f"Unknown pressure unit: {from_unit}")
+    
+    result_psi = 0.0
+    if to_unit_clean in ('psi', 'psia', 'psig'):
+        result_psi = value_psi
+    elif to_unit_clean in ('pa', 'pascal'):
+        result_psi = pa_to_psi(value_psi)
+    else:
+        raise ValueError(f"Unknown pressure unit: {to_unit}")
+    
+    return result_psi
+
+
+def convert_temperature(value: float, from_unit: str, to_unit: str) -> float:
+    """
+    Convert a quantity between temperature units.
+    
+    Supported units: 
+    - 'f', 'F', 'fahrenheit', 'Fahrenheit', '°F', '^°F'
+    - 'c', 'C', 'celsius', 'Celsius', '°C', '^°C'
+    - 'k', 'K', 'kelvin', 'Kelvin', 'abs', 'abskelvin'
+    - 'r', 'R', 'rankine', 'Rankine', '°R', '^°R', 'abs', 'absrankine'
+    
+    Parameters
+    ----------
+    value : float
+        Value to convert.
+    from_unit : str
+        Source unit label.
+    to_unit : str
+        Target unit label.
+    
+    Returns
+    -------
+    float
+        Converted value.
+    
+    Raises
+    ------
+    ValueError
+        If unit is not recognized or value is below absolute zero.
+    UnitConversionError
+        If units are incompatible.
+    """
+    def normalize_temp_unit(unit: str) -> str:
+        """Normalize temperature unit string to canonical form."""
+        unit = unit.lower().strip()
+        # Remove degree symbol if present
+        unit = unit.replace('°', '').replace('^', '').strip()
+        # Common aliases
+        if unit in ('abs', 'abskelvin', 'absolute', 'abskelvindeg'):
+            return 'K'
+        if unit in ('absrankine', 'absrankinedeg'):
+            return 'R'
+        return unit
+    
+    from_unit_norm = normalize_temp_unit(from_unit)
+    to_unit_norm = normalize_temp_unit(to_unit)
+    
+    # Convert to Celsius/Kelvin internally
+    if from_unit_norm == 'f':
+        if value < -459.67:
+            raise ValueError("Temperature cannot be below absolute zero (-459.67°F)")
+        temp_c = fahrenheit_to_celsius(value)
+    elif from_unit_norm == 'c':
+        if value < -273.15:
+            raise ValueError("Temperature cannot be below absolute zero (-273.15°C)")
+        temp_c = value
+    elif from_unit_norm == 'k':
+        if value < 0:
+            raise ValueError("Temperature cannot be below absolute zero (0 K)")
+        temp_c = kelvin_to_celsius(value)
+    elif from_unit_norm == 'r':
+        if value < 0:
+            raise ValueError("Temperature cannot be below absolute zero (0°R)")
+        temp_c = rankine_to_celsius(value)
     else:
         raise ValueError(f"Unknown temperature unit: {from_unit}")
     
-    if to_unit_lower in ['f', 'fahrenheit']:
-        to_unit = '°F'
-    elif to_unit_lower in ['c', 'celsius', '°c']:
-        to_unit = '°C'
-    elif to_unit_lower in ['k', 'kelvin']:
-        to_unit = 'K'
-    elif to_unit_lower in ['r', 'rankine', '°r']:
-        to_unit = '°R'
+    # Convert to target unit
+    if to_unit_norm == 'f':
+        result = celsius_to_fahrenheit(temp_c)
+    elif to_unit_norm == 'c':
+        result = temp_c
+    elif to_unit_norm == 'k':
+        result = celsius_to_kelvin(temp_c)
+    elif to_unit_norm == 'r':
+        result = celsius_to_rankine(temp_c)
     else:
         raise ValueError(f"Unknown temperature unit: {to_unit}")
     
-    if from_unit == to_unit:
-        return value
-    
-    # Relative units (°F ↔ °C)
-    if set([from_unit, to_unit]) == {'°F', '°C'}:
-        if from_unit == '°F':
-            return fahrenheit_to_celsius(value)
-        else:
-            return celsius_to_fahrenheit(value)
-    
-    # Absolute units (K ↔ °R)
-    elif set([from_unit, to_unit]) == {'K', '°R'}:
-        if from_unit == 'K':
-            return kelvin_to_rankine(value)
-        else:
-            return rankine_to_kelvin(value)
-    
-    # Cross-conversions require intermediate conversion
-    else:
-        if from_unit == '°F':
-            kelvin = fahrenheit_to_kelvin(value)
-            if to_unit == '°C':
-                return kelvin_to_celsius(kelvin)
-            else:  # to_unit is '°R'
-                return kelvin_to_rankine(kelvin)
-        elif from_unit == '°C':
-            kelvin = celsius_to_kelvin(value)
-            if to_unit == '°F':
-                return kelvin_to_fahrenheit(kelvin)
-            else:  # to_unit is '°R'
-                return kelvin_to_rankine(kelvin)
-        elif from_unit == 'K':
-            if to_unit == '°F':
-                return kelvin_to_fahrenheit(value)
-            else:  # to_unit is '°C' or '°R'
-                rankine = kelvin_to_rankine(value)
-                if to_unit == '°C':
-                    return rankine_to_celsius(rankine)
-                else:  # to_unit is '°R'
-                    return rankine
-        elif from_unit == '°R':
-            kelvin = rankine_to_kelvin(value)
-            if to_unit == '°F':
-                return kelvin_to_fahrenheit(kelvin)
-            else:  # to_unit is '°C'
-                return rankine_to_celsius(kelvin)
-
-
-def fahrenheit_to_celsius(fahrenheit: float) -> float:
-    """Convert °F to °C."""
-    return (fahrenheit - 32.0) * (5.0 / 9.0)
-
-
-def celsius_to_fahrenheit(celsius: float) -> float:
-    """Convert °C to °F."""
-    return (celsius * 9.0 / 5.0) + 32.0
-
-
-def celsius_to_kelvin(celsius: float) -> float:
-    """Convert °C to K."""
-    return celsius + 273.15
-
-
-def kelvin_to_celsius(kelvin: float) -> float:
-    """Convert K to °C."""
-    return kelvin - 273.15
+    return result
 
 
 __all__ = [
+    'validate_unit_pair',
     'ft_to_m',
     'm_to_ft',
     'psi_to_pa',
@@ -505,6 +695,14 @@ __all__ = [
     'kelvin_to_fahrenheit',
     'rankine_to_kelvin',
     'kelvin_to_rankine',
+    'fahrenheit_to_celsius',
+    'celsius_to_fahrenheit',
+    'celsius_to_kelvin',
+    'kelvin_to_celsius',
+    'fahrenheit_to_rankine',
+    'rankine_to_fahrenheit',
+    'celsius_to_rankine',
+    'rankine_to_celsius',
     'convert_length',
     'convert_pressure',
     'convert_temperature',
