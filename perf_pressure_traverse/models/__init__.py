@@ -2,7 +2,7 @@
 
 from perf_pressure_traverse.models.fluid import FluidProperties
 from perf_pressure_traverse.models.well import WellGeometry
-from perf_pressure_traverse.models.pvt import PVTProperties
+from perf_pressure_traverse.models.pvt_properties import PVTProperties
 from perf_pressure_traverse.models.pressure import (PressurePoint, PressureProfile)
 from perf_pressure_traverse.models.wellflowpath import (
     WellFlowPath,

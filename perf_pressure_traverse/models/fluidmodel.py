@@ -328,7 +328,7 @@ class FluidModel:
         if self.properties.reservoir_temperature_f < -273.15:
             errors.append("Temperature must be non-negative")
         if self.properties.reservoir_temperature_f > 300:
-            warnings.append("Temperature is unusually high for reservoir conditions")
+            errors.append("Temperature is unusually high for reservoir conditions")
         
         if self.fluid_type in (FluidType.OIL, FluidType.OIL_GAS, FluidType.MIST):
             if self.properties.oil_viscosity_cP <= 0:
@@ -336,7 +336,7 @@ class FluidModel:
         
         if self.fluid_type == FluidType.GAS:
             if self.compressibility_factor_z is None:
-                warnings.append("Compressibility factor (Z-factor) is recommended")
+                errors.append("Compressibility factor (Z-factor) is recommended")
         
         return len(errors) == 0
     
