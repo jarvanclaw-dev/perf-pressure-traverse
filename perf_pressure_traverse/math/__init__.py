@@ -6,15 +6,12 @@ from perf_pressure_traverse.math.iterative import (
 )
 from perf_pressure_traverse.math.z_factor import (
     calculate_z_factor_aga_dc,
-    StandingKatz
+    LeeGonzalesEspana
 )
-from perf_pressure_traverse.math.eos import SRKEOS, PengRobinsonEOS
 
 __all__ = [
     "newton_raphson_solver",
     "solve_pressure_step",
     "calculate_z_factor_aga_dc",
-    "StandingKatz",
-    "SRKEOS",
-    "PengRobinsonEOS"
+    "LeeGonzalesEspana",
 ]
