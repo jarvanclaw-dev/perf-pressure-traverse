@@ -268,23 +268,19 @@ def identify_regime_BeggsBrill(
 
     # Determine flow regime based on Beggs-Brill criteria
 
-    # Very low gas rate - bubble flow (priority first)
+    # Primary check: Very low gas rate is bubble flow
     if effective_gas_rate < 0.5:
         return FlowRegime.BUBBLE
 
-    # High gas rate with low liquid velocity - mist flow
-    if gas_velocity > 50.0 and liquid_velocity < 1.0:
-        return FlowRegime.MIST
-
-    # Bubble flow: very low F_Lo
-    if F_Lo < 1.0:
-        return FlowRegime.BUBBLE
-
-    # Mist flow: very high gas rate (high Fr)
+    # Secondary check: Mist flow (high Fr and high F_Lo) - comes before bubble check
     if Fr > 20.0 and F_Lo > 10.0:
         return FlowRegime.MIST
 
-    # Segregated flow: low to intermediate rates, low inclination
+    # Bubble flow: very low F_Lo (but not when Fr is genuinely high - mist case)
+    if F_Lo < 1.0 and Fr < 10.0:
+        return FlowRegime.BUBBLE
+
+    # Segregated flow: low to intermediate rates
     if F_Lo < 3.0:
         return FlowRegime.SEGREGATED
 

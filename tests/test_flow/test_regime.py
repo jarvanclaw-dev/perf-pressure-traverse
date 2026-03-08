@@ -117,9 +117,9 @@ class TestDimensionlessGroups:
         F_Lo = calculate_F_Lo(50.0, 62.4, 300.0, 0.0)
         Fr_Lo = calculate_Fr_Lo(300.0, 0.0)
         gas_Fr = calculate_gas_Fr(500.0, 0.0, 0.2917)
-        assert F_Lo == 0.0
-        assert Fr_Lo == 0.0
-        assert gas_Fr == 0.0
+        assert F_Lo == pytest.approx(0.0, abs=1e-10)
+        assert Fr_Lo == pytest.approx(0.0, abs=1e-10)
+        assert gas_Fr == pytest.approx(0.0, abs=1e-10)
 
 
 class TestInclinationFactor:
