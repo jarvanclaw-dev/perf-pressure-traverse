@@ -49,7 +49,7 @@ class PseudocriticalProperties:
         return temperature_R / self.pseudo_critical_temperature_R
 
 
-calculate_z_factor_aga_dc(
+def calculate_z_factor_aga_dc(
     pressure_psia: float,
     temperature_f: float,
     specific_gravity: float,
