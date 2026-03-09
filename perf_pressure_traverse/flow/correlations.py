@@ -36,9 +36,9 @@ DEFAULT_GW_RATIO_CP = 0.0
 # Typical commercial steel pipe
 PIPE_ROUGHNESS_FT = 0.0019
 
-# Gravity constant for conversion between lbm and lbf (lbm = g·lbm/s²)
+# Gravity constant for conversion between lbm and lbf (lmf = g * lmf/s/s)
 # Used in dimensional analysis for flow calculations
-g = 32.174 ft/s²
+G = 32.174 ft_per_sec_squared
 
 
 class FlowRegime(Enum):
@@ -70,8 +70,6 @@ class BeggsBrillCorrelation:
         Oil flow rate in gallons per minute at standard conditions.
     gas_flow_rate_gpm : float
         Gas flow rate in gallons per minute at standard conditions.
-    oil_gal : float
-        Oil gravity in API.
     pipe_diameter_ft : float
         Pipe inner diameter in feet.
     borehole_area_ft2 : float
@@ -385,8 +383,8 @@ class BeggsBrillCorrelation:
             lam = float('inf')
         
         # Convert viscosity to lb/(ft·s) for dimensional analysis
-        # μ_cP → μ_lb/(ft·s): divide by 1000 then by g (32.174 ft/s²)
-        mu_o_lb_ft_s = mu_o / 1000.0 / g
+        # μ_cP → μ_lb/(ft·s): divide by 1000 then by g (32.174 ft/s/s)
+        mu_o_lb_ft_s = mu_o / 1000.0 / G
         
         D_ft = self.pipe_diameter_ft
         
@@ -395,7 +393,7 @@ class BeggsBrillCorrelation:
             raise ValueError("Pipe diameter must be positive for viscosity calculation")
         
         # Calculate dimensionless parameter
-        dimensionless = (g * mu_o_lb_ft_s * D_ft) ** 4.75
+        dimensionless = (G * mu_o_lb_ft_s * D_ft) ** 4.75
         dimensionless = max(dimensionless, 0.001)  # Prevent negative/zero
         
         # Handle infinite lam value
@@ -469,7 +467,7 @@ class BeggsBrillCorrelation:
             # Higher Rs → higher dissolution ratio
             dissolution = (DEFAULT_OIL_GOR_CP * 0.5) / DEFAULT_OIL_GOR_CP * 100.0
             
-            return min(disolution, 100.0)  # Clamp to 0-100
+            return min(dissolution, 100.0)  # Clamp to 0-100
         except Exception as e:
             return 0.0  # Return 0 on error
     
@@ -563,7 +561,7 @@ class BeggsBrillCorrelation:
             # Clamp ratio to valid range
             V_ratio = max(0.1, V_ratio)
             
-            # Calculate inclination parameter λ_0
+            # Calculate inclination parameter lambda_0
             # Based on pipe orientation for upward flow
             angle_rad = atan(sqrt(fabs(self.well_angle_deg)))
             
@@ -732,11 +730,9 @@ class BeggsBrillCorrelation:
         # Clamp value
         q_l_base = max(0.0, q_l_base)
         
-        g = 32.174  # Gravity in ft/s²
-        
-        # Dimensionless F_Lo = (Q_L × ρ_L) / sqrt(g × A × D)
+        # Dimensionless F_Lo = (Q_L * rho_L) / sqrt(g * A * D)
         # Simplified with mass flow instead of volumetric flow
-        F_Lo = (q_l_base * 1.0) / (sqrt(g * self.borehole_area_ft2 * self.pipe_diameter_ft))
+        F_Lo = (q_l_base * 1.0) / (sqrt(G * self.borehole_area_ft2 * self.pipe_diameter_ft))
         
         return max(0.0, F_Lo)
     
@@ -850,7 +846,7 @@ class BeggsBrillCorrelation:
         # Hydrostatic component
         rho_L = self.oil_density_lbm_ft3
         
-        dm = (1 - lam_g) * rho_L * g * sin(angle_rad)
+        dm = (1 - lam_g) * rho_L * G * sin(angle_rad)
         
         # Clamp to prevent negative values
         dm = max(0.0, dm)
@@ -927,10 +923,15 @@ class BeggsBrillCorrelation:
         ------
         ValueError
             If well_length_ft is non-positive.
+        ValueError
+            If pressure_drop_psi is negative.
         """
         # Validate well length
         if well_length_ft <= 0:
             raise ValueError(f"Well length must be positive, got {well_length_ft} ft")
+        
+        if pressure_drop_psi < 0:
+            raise ValueError(f"Pressure drop must be non-negative, got {pressure_drop_psi} psi")
         
         # Use provided viscosity or calculate
         if mixture_viscosity is None:
@@ -962,7 +963,7 @@ class BeggsBrillCorrelation:
             lam_g = self.calculate_gas_holdup()
             rho_l = self.oil_density_lbm_ft3
             angle_rad = atan(self.well_angle_deg)
-            dm = (1 - lam_g) * rho_l * g * sin(angle_rad)
+            dm = (1 - lam_g) * rho_l * G * sin(angle_rad)
             breakdown['hydrostatic_psi'] = dm * well_length_ft / 144.0
         except Exception:
             pass
