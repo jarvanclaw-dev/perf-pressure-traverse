@@ -156,6 +156,7 @@ class BeggsBrillCorrelation:
             gas_flow_rate_gpm,
             pipe_diameter_ft,
             borehole_area_ft2,
+        well_length_ft,
             well_angle_deg,
         )
         
@@ -164,6 +165,7 @@ class BeggsBrillCorrelation:
         self.gas_flow_rate_gpm = gas_flow_rate_gpm
         self.pipe_diameter_ft = pipe_diameter_ft
         self.borehole_area_ft2 = borehole_area_ft2
+        self.well_length_ft = well_length_ft
         self.well_angle_deg = well_angle_deg
         self.oil_gal = oil_gal
         self.oil_density_lbm_ft3 = oil_density_lbm_ft3
@@ -1019,7 +1021,7 @@ class BeggsBrillCorrelation:
                 'mixture_density_lb_ft3': self.calculate_mixture_density_lb_ft3(),
                 'gas_holdup': self.calculate_gas_holdup(),
                 'pressure_drop_psi': pressure_drop_psi,
-                'total_length_ft': well_length_ft,
+                'total_length_ft': self.well_length_ft,
                 'gas_viscosity_cP': self.gas_viscosity_cP,
                 'oil_viscosity_cP': self.oil_viscosity_cP,
                 'critical_gas_fraction': self.CRITICAL_GAS_FRACTION,
