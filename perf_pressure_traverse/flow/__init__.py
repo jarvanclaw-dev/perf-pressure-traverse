@@ -1,18 +1,43 @@
-"""Flow correlation models module."""
+"""Flow module for multiphase pressure traverse calculations.
 
-from perf_pressure_traverse.flow.correlations import CorrelationSelector
-from perf_pressure_traverse.flow.regime import FlowRegime, identify_regime_BeggsBrill
-from perf_pressure_traverse.flow.friction import (
-    darcy_weisbach_friction_factor,
-    moody_diagram_lookup,
-    api_friction_factor
+Implements:
+- Flow regime identification (Beggs-Brill)
+- Multiphase correlations (Beggs-Brill)
+- Friction factor calculations
+"""
+
+from perf_pressure_traverse.flow.correlations import (
+    BeggsBrillCorrelation,
+    FlowRegime,
+)
+from perf_pressure_traverse.flow.regime import (
+    FlowRegime as Regime,
+    calculate_F_Lo,
+    calculate_Fr_Lo,
+    calculate_gas_Fr,
+    calculate_inclination_factor,
+    calculate_liquid_rate_at_inlet,
+    calculate_liquid_superficial_velocity,
+    calculate_gas_superficial_velocity,
+    identify_regime_BeggsBrill,
+    identify_regime_at_depth,
 )
 
 __all__ = [
-    "CorrelationSelector",
-    "FlowRegime",
-    "identify_regime_BeggsBrill",
-    "darcy_weisbach_friction_factor",
-    "moody_diagram_lookup",
-    "api_friction_factor"
+    # Correlations
+    'BeggsBrillCorrelation',
+    'FlowRegime',
+    
+    # Regime identification
+    'Regime',
+    'FlowRegime',
+    'calculate_F_Lo',
+    'calculate_Fr_Lo',
+    'calculate_gas_Fr',
+    'calculate_inclination_factor',
+    'calculate_liquid_rate_at_inlet',
+    'calculate_liquid_superficial_velocity',
+    'calculate_gas_superficial_velocity',
+    'identify_regime_BeggsBrill',
+    'identify_regime_at_depth',
 ]
