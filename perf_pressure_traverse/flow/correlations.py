@@ -36,9 +36,9 @@ DEFAULT_GW_RATIO_CP = 0.0
 # Typical commercial steel pipe
 PIPE_ROUGHNESS_FT = 0.0019
 
-# Gravity constant for conversion between lbm and lbf (lmf = g * lmf/s/s)
-# Used in dimensional analysis for flow calculations
-G = 32.174 ft_per_sec_squared
+# Gravitational acceleration (ft/s²)
+# Used in dimensional analysis and hydrostatic calculations
+G = 32.174  # ft/s², standard gravity in English units
 
 
 class FlowRegime(Enum):
