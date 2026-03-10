@@ -1,6 +1,5 @@
 """Flow correlation models module."""
 
-from perf_pressure_traverse.flow.correlations import CorrelationSelector
 from perf_pressure_traverse.flow.regime import FlowRegime, identify_regime_BeggsBrill
 from perf_pressure_traverse.flow.friction import (
     darcy_weisbach_friction_factor,
@@ -9,7 +8,6 @@ from perf_pressure_traverse.flow.friction import (
 )
 
 __all__ = [
-    "CorrelationSelector",
     "FlowRegime",
     "identify_regime_BeggsBrill",
     "darcy_weisbach_friction_factor",
