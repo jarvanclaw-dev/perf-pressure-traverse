@@ -7,6 +7,7 @@ from dataclasses import dataclass, field, asdict
 from enum import Enum
 
 from perf_pressure_traverse.models.fluid import FluidProperties
+from perf_pressure_traverse.math.z_factor import calculate_z_factor_aga_dc
 
 
 class FluidType(Enum):
@@ -65,6 +66,7 @@ class FluidModel:
     is_gasoline: bool = False
     is_crude_oil: bool = False
     is_condensate: bool = False
+    calculated_z_factor: Optional[float] = None
     
     @classmethod
     def from_properties(

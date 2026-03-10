@@ -10,6 +10,7 @@ from perf_pressure_traverse.models.well import WellGeometry
 from perf_pressure_traverse.models.result import PressureTraverseResult
 from perf_pressure_traverse.utils.validation import ParameterValidator
 from perf_pressure_traverse.utils.diagnostics import SolverDiagnostics
+from perf_pressure_traverse.math.z_factor import calculate_z_factor_aga_dc
 
 
 class PressureTraverseSolver:
